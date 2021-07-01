@@ -92,8 +92,8 @@ void display_timer(int unused) {
   // Mark window as needing render (aka display() gets run)
   glutPostRedisplay();
   
-  // Recurse in 100ms
-  glutTimerFunc(100, display_timer, 0);
+  // Recurse in 50ms
+  glutTimerFunc(50, display_timer, 0);
 }
 
 /* Handler for keypresses */
@@ -168,9 +168,9 @@ int main(int argc, char** argv) {
   // When GL detects a repaint event, display() will be called
   glutDisplayFunc(display);
 
-  // Every 100ms we call glutPostRedisplay to mark the window as needing a render
+  // Every 50ms we call glutPostRedisplay to mark the window as needing a render
   // This line only schedules 1, we do the same at the end of display_timer() for recursion
-  glutTimerFunc(100, display_timer, 0);
+  glutTimerFunc(50, display_timer, 0);
 
   // Register input handlers
   glutKeyboardFunc(keyPressed);
