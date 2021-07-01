@@ -7,10 +7,13 @@
 
 #include <GL/glut.h>
 
-/* Game state globals */
-double pos_x = 0.0;
-double pos_y = 0.0;
+const unsigned int WIDTH = 600;
+const unsigned int HEIGHT = 400;
 
+/* Game state globals */
+int pos_x = 100;
+int pos_y = 100;
+bool player_died = false;
 
 /* Handler for window-repaint event. Call back when the window first appears and
    whenever the window needs to be re-painted. */
@@ -25,8 +28,9 @@ void display() {
   
   // Begin by using projection mode assuming an 800x600 px window,
   // which lets us do everything in eg 50px instead of 0.02 of window width.
-  // glMatrixMode(GL_PROJECTION);
-  // glOrtho(0, 800, 0, 600, -1, 1);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0, WIDTH, 0, HEIGHT, -1, 1);
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Set background color to black and opaque
   glClear(GL_COLOR_BUFFER_BIT);         // Clear the color buffer (background)
@@ -36,12 +40,12 @@ void display() {
   glPushMatrix();
   {
     glColor3f(1.0f, 1.0f, 1.0f); // White
-    glRasterPos2f(-0.98f, 0.86f);  // Text pos (kinda upper-left)
+    glRasterPos2f(2, HEIGHT-20);  // Text pos (kinda upper-left)
     const char* message = "Welcome to <TODO game name>";
     for (const char* c = message; *c != '\0'; c++) {
       glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *c);
     }
-    glRasterPos2f(-0.98f, 0.86f - 0.20f);  // Text pos (0.20 lower than "kinda upper-left")
+    glRasterPos2f(2, (HEIGHT-20)-20 );  // Text pos (20 lower than "kinda upper-left")
     const char* message_pt2 = "WASD to move, Q to quit.";
     for (const char* c = message_pt2; *c != '\0'; c++) {
       glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *c);
@@ -50,16 +54,31 @@ void display() {
   glPopMatrix();
 
 
-  // Draw a Red 1x1 Square centered at origin
-  glBegin(GL_QUADS);              // Each set of 4 vertices form a quad
-  {
-    glColor3f(1.0f, 0.0f, 0.0f); // Red
-    glVertex2f(-0.2f + pos_x, -0.2f + pos_y);    // x, y
-    glVertex2f( 0.2f + pos_x, -0.2f + pos_y);
-    glVertex2f( 0.2f + pos_x,  0.2f + pos_y);
-    glVertex2f(-0.2f + pos_x,  0.2f + pos_y);
+  if (player_died) {
+    // Print replay text
+    glPushMatrix();
+    {
+      glColor3f(1.0f, 0.0f, 0.0f); // Red
+      glRasterPos2f((WIDTH / 2) - 200, (HEIGHT / 2) - 50 );  // Kinda center
+      const char* message = "You're DEAD!";
+      for (const char* c = message; *c != '\0'; c++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *c);
+      }
+    }
+    glPopMatrix();
   }
-  glEnd();
+  else {
+    // Draw a Red 1x1 Square
+    glBegin(GL_QUADS);              // Each set of 4 vertices form a quad
+    {
+      glColor3f(1.0f, 0.0f, 0.0f); // Red
+      glVertex2f(-8 + pos_x, -8 + pos_y);    // x, y
+      glVertex2f( 8 + pos_x, -8 + pos_y);
+      glVertex2f( 8 + pos_x,  8 + pos_y);
+      glVertex2f(-8 + pos_x,  8 + pos_y);
+    }
+    glEnd();
+  }
 
   // Render now
   glFlush();
@@ -78,22 +97,24 @@ void display_timer(int unused) {
 }
 
 /* Handler for keypresses */
-void keyPressed(unsigned char key, int x, int y) {  
+void keyPressed(unsigned char key, int x, int y) {
+  static int STEP_SIZE = 5;
+
   switch (key) {
     case 'w':
-      pos_y += 0.1;
+      pos_y += STEP_SIZE;
       break;
 
     case 'a':
-      pos_x -= 0.1;
+      pos_x -= STEP_SIZE;
       break;
 
     case 's':
-      pos_y -= 0.1;
+      pos_y -= STEP_SIZE;
       break;
 
     case 'd':
-      pos_x += 0.1;
+      pos_x += STEP_SIZE;
       break;
 
     case 'q':
@@ -104,6 +125,10 @@ void keyPressed(unsigned char key, int x, int y) {
       std::cout << "unhandled key " << key << " x=" << x << " y=" << y << std::endl;
       break;
   }
+
+  // Record if we died after moving
+  player_died = pos_x < 0 || pos_y < 0 || pos_x > WIDTH || pos_y > HEIGHT;
+
 }
 
 void mouseClicks(int button, int state, int x, int y) {
@@ -121,13 +146,24 @@ void mouseClicks(int button, int state, int x, int y) {
 
 }
 
+void resize(int width, int height) {
+  // Ignore new size + request we go back to WIDTHxHEIGHT
+  glutReshapeWindow(WIDTH, HEIGHT);
+}
+
+
 int main(int argc, char** argv) {
   std::cout << "Hello!" << std::endl;
   
   glutInit(&argc, argv);
+  
+  glutInitWindowSize(WIDTH, HEIGHT);
+  glutInitWindowPosition(
+    (glutGet(GLUT_SCREEN_WIDTH)-WIDTH)/2,
+    (glutGet(GLUT_SCREEN_HEIGHT)-HEIGHT)/2
+  );
+
   glutCreateWindow("TODO write game title");
-  glutInitWindowSize(600, 400);
-  //glutInitWindowPosition(50, 50);
   
   // When GL detects a repaint event, display() will be called
   glutDisplayFunc(display);
@@ -139,6 +175,7 @@ int main(int argc, char** argv) {
   // Register input handlers
   glutKeyboardFunc(keyPressed);
   glutMouseFunc(mouseClicks);
+  glutReshapeFunc(resize);
 
   // Finally run main graphics loop
   glutMainLoop();
