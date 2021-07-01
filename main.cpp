@@ -1,0 +1,147 @@
+
+#include <iostream>
+#include <random>
+
+// I hope windows is still POSIX compliant
+#include <sys/time.h>
+
+#include <GL/glut.h>
+
+/* Game state globals */
+double pos_x = 0.0;
+double pos_y = 0.0;
+
+
+/* Handler for window-repaint event. Call back when the window first appears and
+   whenever the window needs to be re-painted. */
+void display() {
+  //std::cout << "Frame!" << std::endl;
+  //std::cout << "x=" << pos_x << "    y=" << pos_y << std::endl;
+
+  // Note: GL is a state machine. This means you need to translate
+  //       a tree of draw commands into a list of operations, and
+  //       to keep yourself sane boundaries like glPushMatrix/glPopMatrix and
+  //       glBegin/glEnd are used between individual drawing routines.
+  
+  // Begin by using projection mode assuming an 800x600 px window,
+  // which lets us do everything in eg 50px instead of 0.02 of window width.
+  // glMatrixMode(GL_PROJECTION);
+  // glOrtho(0, 800, 0, 600, -1, 1);
+
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Set background color to black and opaque
+  glClear(GL_COLOR_BUFFER_BIT);         // Clear the color buffer (background)
+
+  // Draw white text for instructions
+  // NB: Text is a bitch, we'll be making abstractions on top of this soon.
+  glPushMatrix();
+  {
+    glColor3f(1.0f, 1.0f, 1.0f); // White
+    glRasterPos2f(-0.98f, 0.86f);  // Text pos (kinda upper-left)
+    const char* message = "Welcome to <TODO game name>";
+    for (const char* c = message; *c != '\0'; c++) {
+      glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *c);
+    }
+    glRasterPos2f(-0.98f, 0.86f - 0.20f);  // Text pos (0.20 lower than "kinda upper-left")
+    const char* message_pt2 = "WASD to move, Q to quit.";
+    for (const char* c = message_pt2; *c != '\0'; c++) {
+      glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *c);
+    }
+  }
+  glPopMatrix();
+
+
+  // Draw a Red 1x1 Square centered at origin
+  glBegin(GL_QUADS);              // Each set of 4 vertices form a quad
+  {
+    glColor3f(1.0f, 0.0f, 0.0f); // Red
+    glVertex2f(-0.2f + pos_x, -0.2f + pos_y);    // x, y
+    glVertex2f( 0.2f + pos_x, -0.2f + pos_y);
+    glVertex2f( 0.2f + pos_x,  0.2f + pos_y);
+    glVertex2f(-0.2f + pos_x,  0.2f + pos_y);
+  }
+  glEnd();
+
+  // Render now
+  glFlush();
+
+  // Restore default rendering mode (not that any other code uses it)
+  glMatrixMode(GL_MODELVIEW);
+}
+
+/* proxy to satisfy void (*func)(int value) needed by glutTimerFunc */
+void display_timer(int unused) {
+  // Mark window as needing render (aka display() gets run)
+  glutPostRedisplay();
+  
+  // Recurse in 100ms
+  glutTimerFunc(100, display_timer, 0);
+}
+
+/* Handler for keypresses */
+void keyPressed(unsigned char key, int x, int y) {  
+  switch (key) {
+    case 'w':
+      pos_y += 0.1;
+      break;
+
+    case 'a':
+      pos_x -= 0.1;
+      break;
+
+    case 's':
+      pos_y -= 0.1;
+      break;
+
+    case 'd':
+      pos_x += 0.1;
+      break;
+
+    case 'q':
+      std::exit(0);
+      break;
+    
+    default:
+      std::cout << "unhandled key " << key << " x=" << x << " y=" << y << std::endl;
+      break;
+  }
+}
+
+void mouseClicks(int button, int state, int x, int y) {
+  std::cout << "unhandled mouse " << button << " state=" << state << " x=" << x << " y=" << y << std::endl;
+
+  if (button == 2) {
+    // right-click scrambles pos_x and pos_y
+    std::uniform_real_distribution<double> our_random_dist(-0.5, 0.5);
+    std::default_random_engine engine;
+    engine.seed( time(nullptr) );
+    pos_x = our_random_dist(engine);
+    pos_y = our_random_dist(engine);
+
+  }
+
+}
+
+int main(int argc, char** argv) {
+  std::cout << "Hello!" << std::endl;
+  
+  glutInit(&argc, argv);
+  glutCreateWindow("TODO write game title");
+  glutInitWindowSize(600, 400);
+  //glutInitWindowPosition(50, 50);
+  
+  // When GL detects a repaint event, display() will be called
+  glutDisplayFunc(display);
+
+  // Every 100ms we call glutPostRedisplay to mark the window as needing a render
+  // This line only schedules 1, we do the same at the end of display_timer() for recursion
+  glutTimerFunc(100, display_timer, 0);
+
+  // Register input handlers
+  glutKeyboardFunc(keyPressed);
+  glutMouseFunc(mouseClicks);
+
+  // Finally run main graphics loop
+  glutMainLoop();
+
+  return 0;
+}
