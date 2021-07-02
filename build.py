@@ -43,6 +43,14 @@ def main(args=sys.argv):
     'main.cpp',
   ]
 
+  # Windows names their proprietary 64-bit GL implementation "opengl32" -_-
+  # so we link against libraries differently for each OS
+  if os.name == 'nt':
+    lib_flags = ['-lopengl32',]
+    # TODO see https://stackoverflow.com/a/2568108/9252743 for how to use GLUT on windows these days
+  else:
+    lib_flags = ['-lGL', '-lglut',]
+
   subprocess.run([
     cpp,
     # enable a ton of modern C++ tools
@@ -51,7 +59,7 @@ def main(args=sys.argv):
     '-I{}'.format(gl_include_path),
     '-I{}'.format(glut_include_path),
     # Link against OS graphics libraries (must be installed by dev + end users)
-    '-lGL', '-lglut',
+    *lib_flags,
     # Code code code
     *all_src_files,
     # And a.out is a lame name for a program
