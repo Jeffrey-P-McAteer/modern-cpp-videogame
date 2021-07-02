@@ -11,9 +11,13 @@ compiler. This excludes very clean abstractions like [modules](https://en.cppref
 
 # Dev environment setup
 
+Windows has issues running `configure` scripts, and lots of people say the only way
+they can get the OS to compile libraries like SDL2 is using an intermediate shell like [MSYS2](https://www.msys2.org/).
+Proceed at your own peril.
+
 ```bash
 # Install g++ or clang++
-
+# Install make
 # Install python
 
 # Install the requests lib to download dependencies
@@ -30,5 +34,16 @@ python -m build
 To alter the build process, edit `build.py` to run different compile
 commands or pre-process things (make sure any downloaded 3rd-party code is `.gitignore`-ed
 and for godssake use `os.path.join('a', 'b')` instead of hardcoding `a/b` or `a\\b` everywhere).
+
+# Lessons Learned
+
+GL is great for graphics primitives, and in modern languages is easy to use. In C++ it's horrific to setup for multi-platform development,
+thus we currently download and compile a static copy of [SDL](https://github.com/libsdl-org/SDL) to embed for graphics.
+SDL in turn will perform rather dynamic os-specific lookups for a GL runtime (scans around for `GL.so` or `opengl32.dll`, etc.).
+
+`cmd.exe` is aweful, `powershell.exe` is slow, and apparently the best windows dev environment is [MSYS2](https://www.msys2.org/),
+which looks aweful but works for lots of people? I don't speak 25-year-old operating-system-without-a-linker though, the more I study
+windows the more it looks like a sony PSP with 16GB of ram and the world's slowest filesystem hammered on top.
+
 
 

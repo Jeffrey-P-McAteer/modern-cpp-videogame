@@ -6,58 +6,71 @@ import os
 import sys
 import subprocess
 import shutil
+import random
 
 # Our own tools
 import util
 
+
 def main(args=sys.argv):
 
-  cpp = 'clang++'
-  if not shutil.which(cpp):
-    cpp = 'g++'
+  supported_compilers = ['clang++', 'g++']
+
+  # Randomly pick one so on machines w/ both we test both compilers
+  # to make sure our instructions downstairs don't rely on flags
+  # only supported by one compiler.
+  cpp = random.choice(supported_compilers)
+  for _ in range(0, 100):
+    if shutil.which(cpp):
+      break
+    cpp = random.choice(supported_compilers)
 
   if not shutil.which(cpp):
     raise Exception('No supported compiler found! (need g++ or clang++ on PATH')
 
+  other_required_programs = [
+    'autoconf', 'make',
+  ]
+  for p in other_required_programs:
+    if not shutil.which(p):
+      raise Exception('Required program not found: {}'.format(p))
+
   # Download OpenGL headers so we don't need to rely
   # on the developer having them under /usr or C:\Windows
-  mesa_lib_path = os.path.join('libs', 'mesa')
-  if not os.path.exists(mesa_lib_path):
+  sdl_lib_path = os.path.join('libs', 'sdl2')
+  if not os.path.exists(sdl_lib_path):
     util.dl_archive_to(
-      'https://archive.mesa3d.org//mesa-21.1.4.tar.xz',
-      mesa_lib_path
+      'http://www.libsdl.org/release/SDL2-2.0.14.tar.gz',
+      sdl_lib_path
     )
 
-  mesa_glut_lib_path = os.path.join('libs', 'mesa_glut')
-  if not os.path.exists(mesa_glut_lib_path):
-    util.dl_archive_to(
-      'https://archive.mesa3d.org//glut/MesaGLUT-7.9.2.tar.gz',
-      mesa_glut_lib_path
-    )
-
-  gl_include_path = os.path.join(mesa_lib_path, 'include')
-  glut_include_path = os.path.join(mesa_glut_lib_path, 'include')
-
+  # Compile SDL2 (~5 minutes)
+  sdl_static_lib_dir = os.path.join(sdl_lib_path, 'build', '.libs')
+  sdl_include_dir = os.path.join(sdl_lib_path, 'include')
+  if not os.path.exists(sdl_static_lib_dir):
+    subprocess.run([
+      os.path.join('.', 'configure'),
+    ], cwd=sdl_lib_path)
+    subprocess.run([
+      'make',
+    ], cwd=sdl_lib_path)
+  
   # Compile the code
   all_src_files = [
     'main.cpp',
   ]
 
-  # Windows names their proprietary 64-bit GL implementation "opengl32" -_-
-  # so we link against libraries differently for each OS
   if os.name == 'nt':
-    lib_flags = ['-lopengl32',]
-    # TODO see https://stackoverflow.com/a/2568108/9252743 for how to use GLUT on windows these days
+    lib_flags = ['-lSDL2',]
   else:
-    lib_flags = ['-lGL', '-lglut',]
+    lib_flags = ['-lSDL2',]
 
   subprocess.run([
     cpp,
     # enable a ton of modern C++ tools
     '--std=c++20',
     # Add header files
-    '-I{}'.format(gl_include_path),
-    '-I{}'.format(glut_include_path),
+    '-I{}'.format(sdl_include_dir),
     # Link against OS graphics libraries (must be installed by dev + end users)
     *lib_flags,
     # Code code code
@@ -67,7 +80,8 @@ def main(args=sys.argv):
   ], check=True)
 
   # Run the output executable
-  subprocess.run([os.path.join('.', 'main')])
+  if not 'norun' in args:
+    subprocess.run([os.path.join('.', 'main')])
 
 
 if __name__ == '__main__':
