@@ -8,7 +8,8 @@
 
 // 3rd-party libs that build.py downloads, compiles, + adds to our include path
 #include <SDL.h>
-
+//#include <SDL_image.h>
+#include <SDL_timer.h>
 
 const unsigned int WIDTH = 600;
 const unsigned int HEIGHT = 400;
@@ -83,16 +84,32 @@ void set_user_colors() {
     std::endl;
 }
 
+void dieif(bool should_exit, const char* msg) {
+  if (should_exit) {
+    std::cerr << msg << std::endl;
+    std::exit(1);
+  }
+}
+
 int main(int argc, char** argv) {
   std::cout << "Hello!" << std::endl;
 
   // Generate player's color using USERNAME env var (windows), falling back to USER (linux/macos)
   set_user_colors();
-  
-  SDL_ShowSimpleMessageBox( SDL_MESSAGEBOX_INFORMATION, 
-              "Hello World",
-              "You have successfully compiled and linked an SDL2"
-              " program, congratulations.", NULL );
+
+  dieif(SDL_Init(SDL_INIT_EVERYTHING) != 0, "Could not start SDL!");
+
+  SDL_Window* main_window = SDL_CreateWindow(
+    "TODO title here",
+    SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT,
+    SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL
+  );
+  dieif(main_window == nullptr, "Could not create SDL window!");
+
+  SDL_Renderer* rend = SDL_CreateRenderer(main_window, -1, SDL_RENDERER_ACCELERATED);
+  dieif(rend == nullptr, "Could not create SDL rendering engine!");
+
+
 
   return 0;
 }
