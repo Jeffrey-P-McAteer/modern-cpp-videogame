@@ -20,7 +20,7 @@ Proceed at your own peril.
 MSYS2 gives the following packages to windorks users: https://packages.msys2.org/search
 
 ```bash
-pacman -Syu python clang make git
+pacman -Syu python python-pip clang make git
 ```
 
 ## General setup
@@ -55,5 +55,7 @@ SDL in turn will perform rather dynamic os-specific lookups for a GL runtime (sc
 which looks aweful but works for lots of people? I don't speak 25-year-old operating-system-without-a-linker though, the more I study
 windows the more it looks like a sony PSP with 16GB of ram and the world's slowest filesystem hammered on top.
 
+MSYS2 is essentially the terminal + package manager microsoft should have built, delivered by some ex-Arch engineers.
+It's stellar and I don't think I'm ever using `cmd.exe` or chocolatey ever again.
 
 
