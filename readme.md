@@ -21,6 +21,9 @@ MSYS2 gives the following packages to windorks users: https://packages.msys2.org
 
 ```bash
 pacman -Syu python python-pip clang make git mingw-w64-x86_64-toolchain mingw-w64-x86_64-gcc
+
+# Stolen: https://gist.github.com/thales17/fb2e4cff60890a51d9dddd4c6e832ad2
+pacman -S git mingw-w64-x86_64-toolchain mingw64/mingw-w64-x86_64-SDL2 mingw64/mingw-w64-x86_64-SDL2_mixer mingw64/mingw-w64-x86_64-SDL2_image mingw64/mingw-w64-x86_64-SDL2_ttf mingw64/mingw-w64-x86_64-SDL2_net mingw64/mingw-w64-x86_64-cmake make
 ```
 
 ## General setup
