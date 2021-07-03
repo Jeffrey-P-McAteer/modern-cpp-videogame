@@ -50,10 +50,10 @@ def main(args=sys.argv):
   if not os.path.exists(sdl_static_lib_dir):
     subprocess.run([
       os.path.join('.', 'configure'),
-    ], cwd=sdl_lib_path)
+    ], cwd=sdl_lib_path, check=True)
     subprocess.run([
       'make',
-    ], cwd=sdl_lib_path)
+    ], cwd=sdl_lib_path, check=True)
   
   # Compile the code
   all_src_files = [
