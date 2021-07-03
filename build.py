@@ -29,7 +29,7 @@ def main(args=sys.argv):
     raise Exception('No supported compiler found! (need g++ or clang++ on PATH')
 
   other_required_programs = [
-    'autoconf', 'make',
+    'make',
   ]
   for p in other_required_programs:
     if not shutil.which(p):
