@@ -68,7 +68,7 @@ def main(args=sys.argv):
   subprocess.run([
     cpp,
     # enable a ton of modern C++ tools
-    '--std=c++20', '-Wall', '-Werror',
+    '--std=c++2a', '-Wall', '-Werror',
     # Add header files
     '-I{}'.format(sdl_include_dir),
     # Link against OS graphics libraries (must be installed by dev + end users)
