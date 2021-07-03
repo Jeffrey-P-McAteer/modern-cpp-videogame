@@ -15,6 +15,16 @@ Windows has issues running `configure` scripts, and lots of people say the only 
 they can get the OS to compile libraries like SDL2 is using an intermediate shell like [MSYS2](https://www.msys2.org/).
 Proceed at your own peril.
 
+# MSYS2 Install
+
+MSYS2 gives the following packages to windorks users: https://packages.msys2.org/search
+
+```bash
+pacman -Syu python clang make git
+```
+
+## General setup
+
 ```bash
 # Install g++ or clang++
 # Install make
