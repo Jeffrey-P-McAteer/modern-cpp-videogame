@@ -20,7 +20,7 @@ Proceed at your own peril.
 MSYS2 gives the following packages to windorks users: https://packages.msys2.org/search
 
 ```bash
-pacman -Syu python python-pip clang make git
+pacman -Syu python python-pip clang make git mingw-w64-x86_64-toolchain mingw-w64-x86_64-gcc
 ```
 
 ## General setup
