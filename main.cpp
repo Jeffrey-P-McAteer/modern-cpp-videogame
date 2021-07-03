@@ -109,7 +109,25 @@ int main(int argc, char** argv) {
   SDL_Renderer* rend = SDL_CreateRenderer(main_window, -1, SDL_RENDERER_ACCELERATED);
   dieif(rend == nullptr, "Could not create SDL rendering engine!");
 
+  bool want_exit = false;
 
+  while (!want_exit) {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+      switch (event.type) {
+        case SDL_QUIT:
+          want_exit = true;
+          break;
+
+        // case SDL_KEYDOWN: // TODO
+        //   break;
+
+        default:
+          std::cout << "Unhandled SDL_Event: " << event.type << std::endl;
+          break;
+      }
+    }
+  }
 
   return 0;
 }
