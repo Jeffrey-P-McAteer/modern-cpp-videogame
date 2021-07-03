@@ -61,9 +61,9 @@ def main(args=sys.argv):
   ]
 
   if os.name == 'nt':
-    lib_flags = ['-lSDL2',]
+    lib_flags = ['-Wl,-Bstatic', '-lSDL2', '-Wl,-Bdynamic', '-ldl', '-lpthread']
   else:
-    lib_flags = ['-lSDL2',]
+    lib_flags = ['-Wl,-Bstatic', '-lSDL2', '-Wl,-Bdynamic', '-ldl', '-lpthread']
 
   subprocess.run([
     cpp,
@@ -71,10 +71,13 @@ def main(args=sys.argv):
     '--std=c++2a', '-Wall', '-Werror',
     # Add header files
     '-I{}'.format(sdl_include_dir),
+    # Add lib search path
+    '-L{}'.format(sdl_static_lib_dir),
     # Link against OS graphics libraries (must be installed by dev + end users)
     *lib_flags,
     # Code code code
     *all_src_files,
+    *lib_flags,
     # And a.out is a lame name for a program
     '-o', 'main',
   ], check=True)
