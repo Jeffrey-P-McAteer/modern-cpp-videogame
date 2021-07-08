@@ -139,14 +139,14 @@ int main(int argc, char** argv) {
             case SDL_SCANCODE_S:
             case SDL_SCANCODE_DOWN:
               pos_y += 10;
-              if (pos_y > HEIGHT-10) {
+              if (pos_y > (int) (HEIGHT-10) ) {
                 pos_y = HEIGHT-10;
               }
               break;
             case SDL_SCANCODE_D:
             case SDL_SCANCODE_RIGHT:
               pos_x += 10;
-              if (pos_x > WIDTH-10) {
+              if (pos_x > (int) (WIDTH-10)) {
                 pos_x = WIDTH-10;
               }
               break;

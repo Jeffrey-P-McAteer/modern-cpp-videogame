@@ -39,14 +39,26 @@ def main(args=sys.argv):
   # on the developer having them under /usr or C:\Windows
   sdl_lib_path = os.path.join('libs', 'sdl2')
   if not os.path.exists(sdl_lib_path):
-    util.dl_archive_to(
-      'http://www.libsdl.org/release/SDL2-2.0.14.tar.gz',
-      sdl_lib_path
-    )
+    if os.name == 'nt':
+      util.dl_archive_to(
+        'https://www.libsdl.org/release/SDL2-devel-2.0.14-mingw.tar.gz',
+        sdl_lib_path
+      )
+    else:
+      util.dl_archive_to(
+        'http://www.libsdl.org/release/SDL2-2.0.14.tar.gz',
+        sdl_lib_path
+      )
 
   # Compile SDL2 (~5 minutes)
-  sdl_static_lib_dir = os.path.join(sdl_lib_path, 'build', '.libs')
-  sdl_include_dir = os.path.join(sdl_lib_path, 'include')
+  if os.name == 'nt':
+    sdl_static_lib_dir = os.path.join(sdl_lib_path, 'x86_64-w64-mingw32', 'lib')
+    sdl_include_dir = os.path.join(sdl_lib_path, 'x86_64-w64-mingw32', 'include')
+  else:
+    sdl_static_lib_dir = os.path.join(sdl_lib_path, 'build', '.libs')
+    sdl_include_dir = os.path.join(sdl_lib_path, 'include')
+
+  # only happens on linux systems, windorks falls over when running ./configure.
   if not os.path.exists(sdl_static_lib_dir):
     subprocess.run([
       os.path.join('.', 'configure'),
