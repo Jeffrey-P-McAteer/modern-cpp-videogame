@@ -7,10 +7,19 @@ import sys
 import subprocess
 import shutil
 import random
+import platform
 
 # Our own tools
 import util
 
+def is_windows():
+  if os.name == 'nt':
+    return True
+
+  if 'nt' in platform.system().lower() or 'msys' in platform.system().lower():
+    return True
+
+  return False
 
 def main(args=sys.argv):
 
@@ -39,7 +48,7 @@ def main(args=sys.argv):
   # on the developer having them under /usr or C:\Windows
   sdl_lib_path = os.path.join('libs', 'sdl2')
   if not os.path.exists(sdl_lib_path):
-    if os.name == 'nt':
+    if is_windows():
       util.dl_archive_to(
         'https://www.libsdl.org/release/SDL2-devel-2.0.14-mingw.tar.gz',
         sdl_lib_path
@@ -51,7 +60,7 @@ def main(args=sys.argv):
       )
 
   # Compile SDL2 (~5 minutes)
-  if os.name == 'nt':
+  if is_windows():
     sdl_static_lib_dir = os.path.join(sdl_lib_path, 'x86_64-w64-mingw32', 'lib')
     sdl_include_dir = os.path.join(sdl_lib_path, 'x86_64-w64-mingw32', 'include')
   else:
@@ -72,7 +81,7 @@ def main(args=sys.argv):
     'main.cpp',
   ]
 
-  if os.name == 'nt':
+  if is_windows():
     lib_flags = ['-Wl,-Bstatic', '-lSDL2', '-Wl,-Bdynamic', '-ldl', '-lpthread']
   else:
     lib_flags = ['-Wl,-Bstatic', '-lSDL2', '-Wl,-Bdynamic', '-ldl', '-lpthread']
