@@ -35,7 +35,7 @@ def main(args=sys.argv):
     if not shutil.which(p):
       raise Exception('Required program not found: {}'.format(p))
 
-  # Download OpenGL headers so we don't need to rely
+  # Download SDL library + headers so we don't need to rely
   # on the developer having them under /usr or C:\Windows
   sdl_lib_path = os.path.join('libs', 'sdl2')
   if not os.path.exists(sdl_lib_path):
