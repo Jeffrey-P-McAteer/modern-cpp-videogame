@@ -112,6 +112,7 @@ int main(int argc, char** argv) {
   bool want_exit = false;
 
   while (!want_exit) {
+    // Handle all events in the buffer (mouse clicks, keypresses)
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
@@ -119,14 +120,72 @@ int main(int argc, char** argv) {
           want_exit = true;
           break;
 
-        // case SDL_KEYDOWN: // TODO
-        //   break;
+        case SDL_KEYDOWN:
+          switch (event.key.keysym.scancode) { 
+            case SDL_SCANCODE_W:
+            case SDL_SCANCODE_UP:
+              pos_y -= 10;
+              if (pos_y < 0) {
+                pos_y = 0;
+              }
+              break;
+            case SDL_SCANCODE_A:
+            case SDL_SCANCODE_LEFT:
+              pos_x -= 10;
+              if (pos_x < 0) {
+                pos_x = 0;
+              }
+              break;
+            case SDL_SCANCODE_S:
+            case SDL_SCANCODE_DOWN:
+              pos_y += 10;
+              if (pos_y > HEIGHT-10) {
+                pos_y = HEIGHT-10;
+              }
+              break;
+            case SDL_SCANCODE_D:
+            case SDL_SCANCODE_RIGHT:
+              pos_x += 10;
+              if (pos_x > WIDTH-10) {
+                pos_x = WIDTH-10;
+              }
+              break;
+            case SDL_SCANCODE_Q:
+              std::exit(1);
+              break;
+            default:
+              std::cout << "Unhandled SDL_KEYDOWN, key scancode = " << event.key.keysym.scancode << std::endl;
+              break;
+          }
+          break;
 
         default:
           std::cout << "Unhandled SDL_Event: " << event.type << std::endl;
           break;
       }
     }
+
+    // Render the window
+    {
+      SDL_SetRenderDrawColor(rend, 0, 0, 0, SDL_ALPHA_OPAQUE);
+      SDL_RenderClear(rend); 
+
+      SDL_SetRenderDrawColor(rend, (int) (player_color[0] * 255.0), (int) (player_color[1] * 255.0), (int) (player_color[2] * 255.0), SDL_ALPHA_OPAQUE);
+      SDL_Rect player_rect;
+      player_rect.x = pos_x;
+      player_rect.y = pos_y;
+      player_rect.w = 10;
+      player_rect.h = 10;
+      SDL_RenderFillRect(rend, &player_rect);
+
+    }
+
+    // Flip buffers
+    SDL_RenderPresent(rend); 
+
+    // Delay 8ms, giving us 120 fps if the event handling + rendering takes 0ms.
+    SDL_Delay(1000 / 120);
+
   }
 
   return 0;
